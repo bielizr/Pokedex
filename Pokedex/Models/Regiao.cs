@@ -7,7 +7,7 @@ namespace Pokedex.Models;
 public class Regiao
 {
     [Key]
-    public uint Id { get; set; }
+    public int Id { get; set; }
 
     [Required(ErrorMessage = "Informe o nome")]
     [StringLength(30, ErrorMessage = " O Nome deve possuir no máximo 30 caracteres")]
