@@ -1,8 +1,9 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Pokedex.Data;
 using Pokedex.Models;
+using Microsoft.EntityFrameworkCore;
+using Pokedex.ViewModels;
 
 namespace Pokedex.Controllers;
 
@@ -19,8 +20,38 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-        
-        return View();
+        HomeVM home = new()
+        {
+            Tipos = _context.Tipos.ToList(),
+            Pokemons = _context.Pokemons
+                .Include(p => p.Tipos)
+                .ThenInclude(pt => pt.Tipo)
+                .ToList()
+        };
+        return View(home);
+    }
+
+    [HttpGet]
+    public IActionResult Details(int id)
+    {
+        Pokemon pokemon = _context.Pokemons
+            .Where(p => p.Numero == id)
+            .Include(p => p.Tipos)
+            .ThenInclude(pt => pt.Tipo)
+            .Include(p => p.Regiao)
+            .Include(p => p.Genero)
+            .SingleOrDefault();
+        DetailsVM details = new()
+        {
+            Atual = pokemon,
+            Anterior = _context.Pokemons
+                .OrderByDescending(p => p.Numero)
+                .FirstOrDefault(p => p.Numero < id),
+            Proximo  =  _context.Pokemons
+                .OrderBy(p => p.Numero)
+                .FirstOrDefault(p => p.Numero > id)
+        };
+        return View(details);
     }
 
     public IActionResult Privacy()
